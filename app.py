@@ -10,6 +10,7 @@ app = Flask(__name__)
 
 # Set up paths and load the YOLO model
 pytesseract.pytesseract.tesseract_cmd = r'Tesseract-OCR\tesseract.exe'
+
 model_path = 'yolov8_license_plate.pt'
 model = YOLO(model_path)
 output_dir = 'inference_output'
