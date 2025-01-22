@@ -47,6 +47,10 @@ def detect_and_ocr_plate(image_path):
     return ocr_results
 
 
+#Route for homepage
+@app.route('/')
+def index():
+    return "License Plate Detector is up and running!"
 # Route to handle image upload and processing
 @app.route('/detect_license_plate', methods=['POST'])
 def detect_license_plate():
