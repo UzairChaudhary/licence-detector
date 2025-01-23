@@ -54,6 +54,6 @@ filelock==3.16.1
 platformdirs==4.3.6
 packaging==24.2
 typing_extensions==4.12.2
-
+ultralytics==8.3.38  # Use the latest stable version
 # Required for deployment
 gunicorn==21.2.0
