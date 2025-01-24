@@ -4,17 +4,23 @@ import pandas as pd
 from ultralytics import YOLO
 from PIL import Image, ImageEnhance
 import pytesseract
+import tempfile
+import shutil
+import logging
 
 # Initialize Flask app
 app = Flask(__name__)
 
-# Set up paths and load the YOLO model
-pytesseract.pytesseract.tesseract_cmd = r'Tesseract-OCR\tesseract.exe'
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
+# Set up Tesseract path for Heroku
+pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
+
+# Load the YOLO model
 model_path = 'yolov8_license_plate.pt'
 model = YOLO(model_path)
-output_dir = 'inference_output'
-os.makedirs(output_dir, exist_ok=True)
 
 # Load expired and valid license plates with complete information
 expired_df = pd.read_csv('Expired_License_Plates.csv')
@@ -46,16 +52,20 @@ def detect_and_ocr_plate(image_path):
 
     return ocr_results
 
-
-#Route for homepage
+# Route for homepage
 @app.route('/')
 def index():
     return "License Plate Detector is up and running!"
+
 # Route to handle image upload and processing
 @app.route('/detect_license_plate', methods=['POST'])
 def detect_license_plate():
     if 'image' not in request.files:
         return jsonify({"error": "No image provided"}), 400
+
+    # Create a temporary directory for output
+    output_dir = tempfile.mkdtemp()
+    os.makedirs(output_dir, exist_ok=True)
 
     # Save uploaded image
     image = request.files['image']
@@ -80,6 +90,9 @@ def detect_license_plate():
         else:
             license_check_results.append({"plate": detected_plate, "status": "unknown"})
 
+    # Clean up temporary files
+    shutil.rmtree(output_dir)
+
     # Return results as JSON
     response = {
         "ocr_results": ocr_results,
@@ -87,10 +100,7 @@ def detect_license_plate():
     }
     return jsonify(response)
 
-
 # Main function to run the app
-# if __name__ == '__main__':
-#     app.run(host="0.0.0.0", port=5000)
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
