@@ -1,5 +1,0 @@
-flask
-pandas
-ultralytics
-pillow
-pytesseract
